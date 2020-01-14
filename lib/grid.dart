@@ -97,10 +97,12 @@ class Grid extends DisplayObjectContainer {
     var dijkstraButton = querySelector('#dijkstraButton');
     dijkstraButton.onClick.listen((e) {
       print("running Dijkstra's algorithm");
-      //calculateAdjacencies();
+      calculateAdjacencies();
+
       computePaths();
       //print(getShortestPath());
-      getShortestPath();
+      //getShortestPath();
+
       print("ran Dijkstra's algorithm");
     });
 
@@ -111,6 +113,21 @@ class Grid extends DisplayObjectContainer {
       print('cleared verticies');
     });
   }
+
+    void printVerticies() {
+      var types = '';
+      for (var r = 0; r < verticies.length - 1; r++) {
+        for (var c = 0; c < verticies[r].length - 1; c++) {
+          if (verticies[r][c] != null) {
+            var type = verticies[r][c].getType();
+            types = ('$types $type, ');
+          } else {
+            types = ('$types null, ');
+          }
+        }
+      }
+      print(types);
+    }
 
     void createVertex(int r, int c, String type) {
       var x_pos = spritePosition(r),
@@ -200,24 +217,19 @@ class Grid extends DisplayObjectContainer {
       }
     }
 
-    //TODO: get all adjacencies for each vertex
     void calculateAdjacencies() {
       for (var r = 0; r < verticies.length - 1; r++) {
         for (var c = 0; c < verticies[r].length - 1; c++) {
           if (c - 1 > -1) {
-            //verticies[r][c].adjacencies.add(Edge(verticies[r][c - 1], 1));
             verticies[r][c].addAdjacencies(Edge(verticies[r][c - 1], 1));
           }
           if (r + 1 < 25) {
-            //verticies[r][c].adjacencies.add(Edge(verticies[r + 1][c], 1));
             verticies[r][c].addAdjacencies(Edge(verticies[r + 1][c], 1));
           }
           if (c + 1 < 25) {
-            //verticies[r][c].adjacencies.add(Edge(verticies[r][c + 1], 1));
             verticies[r][c].addAdjacencies(Edge(verticies[r][c + 1], 1));
           }
           if (r - 1 > -1) {
-            //verticies[r][c].adjacencies.add(Edge(verticies[r - 1][c], 1));
             verticies[r][c].addAdjacencies(Edge(verticies[r - 1][c], 1));
           }
         }
@@ -225,17 +237,23 @@ class Grid extends DisplayObjectContainer {
     }
 
     void computePaths() {
+      // TODO: minDistances need to be set?
       calculateAdjacencies();
       start.setMinDistance(0);
-      var queue = [];
-      //queue.add(start);
-      //queue should contain every vertex?
+      var visited = [];
+      var queue = PriorityQueue();
       for (var r = 0; r < verticies.length - 1; r++) {
         for (var c = 0; c < verticies[r].length - 1; c++) {
           queue.add(verticies[r][c]);
         }
       }
 
+      while (queue.isNotEmpty) {
+        //var current = queue.
+        // current is the smallest minDist within queue (starts out with start, (0))
+      }
+
+/*
       while (queue.isNotEmpty) {
         var current = queue[0];
         queue.removeAt(0);
@@ -253,7 +271,11 @@ class Grid extends DisplayObjectContainer {
           }
         }
       }
-    /*
+      */
+
+
+
+    /* old
       start.setMinDistance(0);
       var vertexQueue = PriorityQueue();
       vertexQueue.add(start);
@@ -280,9 +302,8 @@ class Grid extends DisplayObjectContainer {
       var path = [];
       for (var target = end; target != null; target.previous) {
         path.add(target);
-        //var reversedPath = path.reversed;
-        return path;
       }
+      return path.reversed;
     }
 
     void drawSprite(Vertex vertex) {
