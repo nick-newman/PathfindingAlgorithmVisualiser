@@ -2,7 +2,6 @@ import 'dart:html';
 import 'package:collection/collection.dart';
 import 'package:stagexl/stagexl.dart';
 import 'package:test_project3/vertex.dart';
-import 'package:test_project3/edge.dart';
 
 class Grid extends DisplayObjectContainer {
 
@@ -40,20 +39,20 @@ class Grid extends DisplayObjectContainer {
     }
   
     var startBitmap = Bitmap(BitmapData(30, 30, Color.LimeGreen));
-    start = Vertex('start', startBitmap);
+    start = Vertex('start', startBitmap, 7, 12);
     verticies[7][12] = start;
     start.moveSprite(226, 386);
     drawSprite(start);
 
     var endBitmap = Bitmap(BitmapData(30, 30, Color.IndianRed));
-    end = Vertex('end', endBitmap);
+    end = Vertex('end', endBitmap, 17, 12);
     verticies[17][12] = end;
     end.moveSprite(546, 386);
     drawSprite(end);
 
   // set every vertex to blank, not including the start or end
-    for (var r = 0; r < verticies.length - 1; r++) {
-      for (var c = 0; c < verticies[r].length - 1; c++) {
+    for (var r = 0; r < verticies.length; r++) {
+      for (var c = 0; c < verticies[r].length; c++) {
         if (verticies[r][c] != start && verticies[r][c] != end) {
           createVertex(r, c, 'blank');
         }
@@ -72,19 +71,19 @@ class Grid extends DisplayObjectContainer {
         if (verticies[r][c] == start) {
           removeSprite(start);
           drawSprite(start);
-          start.getSprite().startDrag();
+          start.sprite.startDrag();
         } else if (verticies[r][c] == end) {
           removeSprite(end);
           drawSprite(end);
-          end.getSprite().startDrag();
+          end.sprite.startDrag();
         }
       }
     });
 
   // when mouse is up, disable start/end dragging, 
     stage.onMouseUp.listen((e) {
-      start.getSprite().stopDrag();
-      end.getSprite().stopDrag();
+      start.sprite.stopDrag();
+      end.sprite.stopDrag();
       if (background.hitTestInput(mouseX, mouseY) != null) {
         if (moveEndpoint(r, c)) {
           createVertex(r, c, 'wall');
@@ -99,10 +98,21 @@ class Grid extends DisplayObjectContainer {
       print("running Dijkstra's algorithm");
       calculateAdjacencies();
 
-      computePaths();
-      //print(getShortestPath());
-      //getShortestPath();
+      var visited = computePaths();
+      var path = getShortestPath();
 
+      highlightVisited(visited);
+      //calculate duration to wait until all visited are highlighted?
+      highlightPath(path);
+
+      /*
+      print('path:');
+      for (Vertex vertex in path) {
+        var row = vertex.row;
+        var col = vertex.col;
+        print('$vertex ($row, $col),');
+      }
+      */
       print("ran Dijkstra's algorithm");
     });
 
@@ -116,13 +126,15 @@ class Grid extends DisplayObjectContainer {
 
     void printVerticies() {
       var types = '';
-      for (var r = 0; r < verticies.length - 1; r++) {
-        for (var c = 0; c < verticies[r].length - 1; c++) {
+      var counter = 0;
+      for (var r = 0; r < verticies.length; r++) {
+        for (var c = 0; c < verticies[r].length; c++) {
+          counter++;
           if (verticies[r][c] != null) {
-            var type = verticies[r][c].getType();
-            types = ('$types $type, ');
+            var type = verticies[r][c].type;
+            types = ('$types $type:$counter, ');
           } else {
-            types = ('$types null, ');
+            types = ('$types null:$counter, ');
           }
         }
       }
@@ -141,9 +153,9 @@ class Grid extends DisplayObjectContainer {
       } else {
         return;
       }
-      var vertex = Vertex(type, bitmap);
+      var vertex = Vertex(type, bitmap, r, c);
       vertex.moveSprite(x_pos as double, y_pos as double);
-      if (vertex.getType() != 'blank') {
+      if (vertex.type != 'blank') {
         drawSprite(vertex);
       }
       verticies[r][c] = vertex;
@@ -199,8 +211,8 @@ class Grid extends DisplayObjectContainer {
       //if (verticies[r][c] == null) {
       //  return false;
       //} else
-      if (verticies[r][c].getType() == 'wall') {
-        stage.removeChild(verticies[r][c].getSprite());
+      if (verticies[r][c].type == 'wall') {
+        stage.removeChild(verticies[r][c].sprite);
         createVertex(r, c, 'blank');
         print('deleted wall at ($r, $c)');
         return true;
@@ -210,108 +222,92 @@ class Grid extends DisplayObjectContainer {
 
   // replaces all wall verticies with blank verticies
     void clearVerticies() {
-      for (var r = 0; r < verticies.length - 1; r++) {
-        for (var c = 0; c < verticies[r].length - 1; c++) {
+      for (var r = 0; r < verticies.length; r++) {
+        for (var c = 0; c < verticies[r].length; c++) {
           deleteVertex(r, c);
         }
       }
     }
 
     void calculateAdjacencies() {
-      for (var r = 0; r < verticies.length - 1; r++) {
-        for (var c = 0; c < verticies[r].length - 1; c++) {
-          if (c - 1 > -1) {
-            verticies[r][c].addAdjacencies(Edge(verticies[r][c - 1], 1));
+      for (var r = 0; r < verticies.length; r++) {
+        for (var c = 0; c < verticies[r].length; c++) {
+          if (c - 1 > -1 && verticies[r][c - 1].type != 'wall') {
+            verticies[r][c].addAdjacencies(verticies[r][c - 1]);
           }
-          if (r + 1 < 25) {
-            verticies[r][c].addAdjacencies(Edge(verticies[r + 1][c], 1));
+          if (r + 1 < 25 && verticies[r + 1][c].type != 'wall') {
+            verticies[r][c].addAdjacencies(verticies[r + 1][c]);
           }
-          if (c + 1 < 25) {
-            verticies[r][c].addAdjacencies(Edge(verticies[r][c + 1], 1));
+          if (c + 1 < 25 && verticies[r][c + 1].type != 'wall') {
+            verticies[r][c].addAdjacencies(verticies[r][c + 1]);
           }
-          if (r - 1 > -1) {
-            verticies[r][c].addAdjacencies(Edge(verticies[r - 1][c], 1));
+          if (r - 1 > -1 && verticies[r - 1][c].type != 'wall') {
+            verticies[r][c].addAdjacencies(verticies[r - 1][c]);
           }
+          //print(verticies[r][c].getAdjacencies());
         }
       }
     }
 
-    void computePaths() {
-      // TODO: minDistances need to be set?
-      calculateAdjacencies();
-      start.setMinDistance(0);
+    List computePaths() {
       var visited = [];
-      var queue = PriorityQueue();
-      for (var r = 0; r < verticies.length - 1; r++) {
-        for (var c = 0; c < verticies[r].length - 1; c++) {
-          queue.add(verticies[r][c]);
+      start.minDistance = 0;
+      var queue = [];
+      queue.add(start);
+
+      while (queue.isNotEmpty) {
+        if (queue.elementAt(0).type == 'wall') {
+          queue.removeAt(0);
         }
-      }
-
-      while (queue.isNotEmpty) {
-        //var current = queue.
-        // current is the smallest minDist within queue (starts out with start, (0))
-      }
-
-/*
-      while (queue.isNotEmpty) {
-        var current = queue[0];
+        var current = queue.elementAt(0);
         queue.removeAt(0);
-        // has visited start, now will check adjacencies of start
-
-        for (Edge edge in current.getAdjacencies()) {
-          var adjacent = edge.getTarget();
-          var weight = edge.getWeight();
-          double currentDistance = current.getMinDistance() + weight; //weight could be removed as it is always 1
-          if (currentDistance < adjacent.getMinDistance()) {
-            queue.remove(adjacent);
-            adjacent.setMinDistance(currentDistance);
-            adjacent.setPrevious(current);
-            queue.add(adjacent);
+        if (current == end) {
+          return visited;
+        }
+        for (Vertex vertex in current.adjacencies) {
+          visited.add(vertex);
+          //TODO: walls
+          double currentDistance = current.minDistance + 1;
+          if (currentDistance < vertex.minDistance) {
+            queue.remove(vertex);
+            vertex.minDistance = currentDistance;
+            vertex.previous = current;
+            queue.add(vertex);
           }
         }
       }
-      */
-
-
-
-    /* old
-      start.setMinDistance(0);
-      var vertexQueue = PriorityQueue();
-      vertexQueue.add(start);
-
-      while (vertexQueue.isNotEmpty) {
-        var u = vertexQueue.removeFirst();
-
-        for (Edge e in u.getAdjacencies()) {
-          var v = e.getTarget();
-          var weight = e.getWeight();
-          double distanceThroughU = u.getMinDistance() + weight;
-          if (distanceThroughU < v.getMinDistance()) {
-            vertexQueue.remove(v);
-            v.setMinDistance(distanceThroughU);
-            v.setPrevious(u);
-            vertexQueue.add(v);
-          }
-        }
-      }
-    */
+      return visited;
     }
 
     List getShortestPath() {
       var path = [];
-      for (var target = end; target != null; target.previous) {
-        path.add(target);
+      for (var vertex = end; vertex != null; vertex = vertex.previous) {
+        path.add(vertex);
       }
-      return path.reversed;
+      return path;
+    }
+
+    Future<void> highlightVisited(List visited) async {
+      for (var vertex in visited) {
+        //await Future.delayed(Duration(milliseconds : 1));
+        vertex.highlight('blue');
+        drawSprite(vertex);
+      }
+    }
+
+    void highlightPath(List path) {
+      for (var vertex in path) {
+        vertex.highlight('yellow');
+        drawSprite(vertex);
+      }
     }
 
     void drawSprite(Vertex vertex) {
-      stage.addChild(vertex.getSprite());
+      stage.addChild(vertex.sprite);
     }
 
     void removeSprite(Vertex vertex) {
-      stage.removeChild(vertex.getSprite());
+      stage.removeChild(vertex.sprite);
     }
 
     int mouseGridRow() {
