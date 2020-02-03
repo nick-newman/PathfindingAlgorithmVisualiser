@@ -7,7 +7,7 @@ class GridTest extends DisplayObjectContainer {
   @override
   var stage;
   var canvas, renderLoop;
-  num row, column;
+  int row, column;
   Node startNode, endNode;
   Bitmap startBitmap, endBitmap, backgroundBitmap;
   Sprite startSprite = Sprite(), endSprite = Sprite();
@@ -46,7 +46,7 @@ class GridTest extends DisplayObjectContainer {
     endBitmap = Bitmap(BitmapData(30, 30, Color.OrangeRed));
     endNode = Node(endBitmap, 'end', 7, 12);
     nodes[7][12] = endNode;
-    startSprite.addChild(endBitmap);
+    endSprite.addChild(endBitmap);
     stage.addChild(endSprite);
     endBitmap.x = 546;
     endBitmap.y = 386;
@@ -59,42 +59,39 @@ class GridTest extends DisplayObjectContainer {
       }
     }
 
-
-
-  // when mouse is pressed down, check if mouse is inside the grid, then and find the vertex the mouse clicked on
     stage.onMouseDown.listen((e) {
       if (backgroundBitmap.hitTestInput(mouseX, mouseY) != null) {
         row = mouseGridRow();
         column = mouseGridColumn();
-
-      // if mouse is on start/end, allow it to be dragged
         if (nodes[row][column] == startNode) {
           stage.removeChild(startSprite);
           stage.addChild(startSprite);
           startSprite.startDrag();
         } else if (nodes[row][column] == endNode) {
           stage.removeChild(endSprite);
-          drawSprite(end);
-          end.sprite.startDrag();
+          stage.addChild(endSprite);
+          endSprite.startDrag();
         }
       }
     });
 
-  // when mouse is up, disable start/end dragging, 
     stage.onMouseUp.listen((e) {
-      start.sprite.stopDrag();
-      end.sprite.stopDrag();
-      if (background.hitTestInput(mouseX, mouseY) != null) {
-        if (moveEndpoint(r, c)) {
-          createVertex(r, c, 'wall');
+      startSprite.stopDrag();
+      endSprite.stopDrag();
+      if (backgroundBitmap.hitTestInput(mouseX, mouseY) != null) {
+        if (moveEndpoint(row, column)) {
+          createWallNode(row, column);
         }
       } else {
-        verticies[r][c].moveSprite(spritePosition(r) as double, spritePosition(c) as double);
+        if (nodes[row][column].type == 'start') {
+          startSprite.x = spritePosition(row);
+          startSprite.y = spritePosition(column);
+        } else if (nodes[row][column].type == 'end') {
+          endSprite.x = spritePosition(row);
+          endSprite.y = spritePosition(column);
+        }
       }
     });
-
-
-
   }
 
   bool moveEndpoint(int r, int c) {
@@ -121,7 +118,7 @@ class GridTest extends DisplayObjectContainer {
       return false;
     }
 
-    //deleteWallNode(new_r, new_c);
+    deleteWallNode(new_r, new_c);
 
     if (nodes[r][c] == startNode) {
       startNode.bitmap.x = new_x_pos;
@@ -190,12 +187,6 @@ class GridTest extends DisplayObjectContainer {
     }
   }
 
-
-
-
-
-
-
   int mouseGridRow() {
     return (mouseX / 32).truncate();
   }
@@ -211,5 +202,4 @@ class GridTest extends DisplayObjectContainer {
   int listPosition(int n) {
     return (n / 32).truncate();
   }
-
 }

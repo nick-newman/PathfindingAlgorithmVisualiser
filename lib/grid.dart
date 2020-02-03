@@ -44,7 +44,7 @@ class Grid extends DisplayObjectContainer {
     start.moveSprite(226, 386);
     drawSprite(start);
 
-    var endBitmap = Bitmap(BitmapData(30, 30, Color.IndianRed));
+    var endBitmap = Bitmap(BitmapData(30, 30, Color.OrangeRed));
     end = Vertex('end', endBitmap, 17, 12);
     verticies[17][12] = end;
     end.moveSprite(546, 386);
