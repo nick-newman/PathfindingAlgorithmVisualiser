@@ -96,24 +96,24 @@ class Grid extends DisplayObjectContainer {
     var dijkstraButton = querySelector('#dijkstraButton');
     dijkstraButton.onClick.listen((e) {
       print("running Dijkstra's algorithm");
-      calculateAdjacencies();
 
+      calculateAdjacencies();
       var visited = computePaths();
       var path = getShortestPath();
+      highlight(visited, path);
 
-      highlightVisited(visited);
-      //calculate duration to wait until all visited are highlighted?
-      highlightPath(path);
-
-      /*
-      print('path:');
+      
+      //print('path:');
       for (Vertex vertex in path) {
-        var row = vertex.row;
-        var col = vertex.col;
-        print('$vertex ($row, $col),');
+        //var row = vertex.row;
+        //var col = vertex.col;
+        //print('$vertex ($row, $col),');
+        print(vertex.type);
       }
-      */
+      
       print("ran Dijkstra's algorithm");
+
+      
     });
 
     var clearButton = querySelector('#clearButton');
@@ -183,10 +183,6 @@ class Grid extends DisplayObjectContainer {
         return false;
       }
 
-      //if (verticies[new_r][new_c] != null) {
-      //  deleteVertex(new_r, new_c);
-      //}
-
       deleteVertex(new_r, new_c);
 
       if (verticies[r][c] == start) {
@@ -206,12 +202,9 @@ class Grid extends DisplayObjectContainer {
       }
     }
   
-  // checks if the vertex at r, c is a wall, replaces it with a blank vertex
+  // checks if the vertex at r, c is a wall or visited, replaces it with a blank vertex
     bool deleteVertex(int r, int c) {
-      //if (verticies[r][c] == null) {
-      //  return false;
-      //} else
-      if (verticies[r][c].type == 'wall' || verticies[r][c].type == 'visited' || verticies[r][c].type == 'path') {
+      if (verticies[r][c].type == 'wall' || verticies[r][c].type == 'visited') {
         stage.removeChild(verticies[r][c].sprite);
         createVertex(r, c, 'blank');
         print('deleted wall at ($r, $c)');
@@ -220,7 +213,7 @@ class Grid extends DisplayObjectContainer {
       return false;
     }
 
-  // replaces all wall verticies with blank verticies
+  // replaces all wall/visited verticies with blank verticies
     void clearVerticies() {
       for (var r = 0; r < verticies.length; r++) {
         for (var c = 0; c < verticies[r].length; c++) {
@@ -232,17 +225,20 @@ class Grid extends DisplayObjectContainer {
     void calculateAdjacencies() {
       for (var r = 0; r < verticies.length; r++) {
         for (var c = 0; c < verticies[r].length; c++) {
+
+          verticies[r][c].adjacencies.clear();
+
           if (c - 1 > -1 && verticies[r][c - 1].type != 'wall') {
-            verticies[r][c].addAdjacencies(verticies[r][c - 1]);
+            verticies[r][c].adjacencies.add(verticies[r][c - 1]);
           }
           if (r + 1 < 25 && verticies[r + 1][c].type != 'wall') {
-            verticies[r][c].addAdjacencies(verticies[r + 1][c]);
+            verticies[r][c].adjacencies.add(verticies[r + 1][c]);
           }
           if (c + 1 < 25 && verticies[r][c + 1].type != 'wall') {
-            verticies[r][c].addAdjacencies(verticies[r][c + 1]);
+            verticies[r][c].adjacencies.add(verticies[r][c + 1]);
           }
           if (r - 1 > -1 && verticies[r - 1][c].type != 'wall') {
-            verticies[r][c].addAdjacencies(verticies[r - 1][c]);
+            verticies[r][c].adjacencies.add(verticies[r - 1][c]);
           }
           //print(verticies[r][c].getAdjacencies());
         }
@@ -264,9 +260,9 @@ class Grid extends DisplayObjectContainer {
         if (current == end) {
           return visited;
         }
+        visited.add(current);
         for (Vertex vertex in current.adjacencies) {
-          visited.add(vertex);
-          //TODO: walls
+          //visited.add(vertex);
           double currentDistance = current.minDistance + 1;
           if (currentDistance < vertex.minDistance) {
             queue.remove(vertex);
@@ -287,19 +283,15 @@ class Grid extends DisplayObjectContainer {
       return path;
     }
 
-    Future<void> highlightVisited(List visited) async {
+    Future<void> highlight(List visited, List path) async {
       for (var vertex in visited) {
-        //await Future.delayed(Duration(milliseconds : 1));
+        await Future.delayed(Duration(milliseconds : 2));
         vertex.highlight('blue');
-        vertex.type = 'visited';
         drawSprite(vertex);
       }
-    }
 
-    void highlightPath(List path) {
       for (var vertex in path) {
         vertex.highlight('yellow');
-        vertex.type = 'path';
         drawSprite(vertex);
       }
     }

@@ -31,14 +31,10 @@ class Vertex {
     sprite.y = y;
   }
 
-  void addAdjacencies(Vertex vertex) {
-    adjacencies.add(vertex);
-  }
-
   // TODO: instead of using highlight, should create vertexless bitmaps stored in arrays for path/visited
   void highlight(String color) {
     int colorInt;
-    if (type == 'blank') {
+    if (type != 'start' && type != 'end') {
       // Note: blank verticies do not have a drawn sprite
       if (color == 'yellow') {
         colorInt = Color.LightGoldenrodYellow;
@@ -47,6 +43,7 @@ class Vertex {
       }
       var new_bitmap = Bitmap(BitmapData(30, 30, colorInt));
       sprite.addChild(new_bitmap);
+      type = 'visited';
     }
   }
 }
