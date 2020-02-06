@@ -211,7 +211,7 @@ class Grid extends DisplayObjectContainer {
       //if (verticies[r][c] == null) {
       //  return false;
       //} else
-      if (verticies[r][c].type == 'wall') {
+      if (verticies[r][c].type == 'wall' || verticies[r][c].type == 'visited' || verticies[r][c].type == 'path') {
         stage.removeChild(verticies[r][c].sprite);
         createVertex(r, c, 'blank');
         print('deleted wall at ($r, $c)');
@@ -291,6 +291,7 @@ class Grid extends DisplayObjectContainer {
       for (var vertex in visited) {
         //await Future.delayed(Duration(milliseconds : 1));
         vertex.highlight('blue');
+        vertex.type = 'visited';
         drawSprite(vertex);
       }
     }
@@ -298,6 +299,7 @@ class Grid extends DisplayObjectContainer {
     void highlightPath(List path) {
       for (var vertex in path) {
         vertex.highlight('yellow');
+        vertex.type = 'path';
         drawSprite(vertex);
       }
     }
