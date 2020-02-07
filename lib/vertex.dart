@@ -32,7 +32,7 @@ class Vertex {
   }
 
   // TODO: instead of using highlight, should create vertexless bitmaps stored in arrays for path/visited
-  void highlight(String color) {
+  Future<void> highlight(String color) async {
     int colorInt;
     if (type != 'start' && type != 'end') {
       // Note: blank verticies do not have a drawn sprite

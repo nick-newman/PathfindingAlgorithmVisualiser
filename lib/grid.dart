@@ -190,12 +190,14 @@ class Grid extends DisplayObjectContainer {
         createVertex(r, c, 'blank');
         verticies[new_r][new_c] = start;
         print('moved start node to ($new_r, $new_c)');
+        calculateAdjacencies();
         return false;
       } else if (verticies[r][c] == end) {
         end.moveSprite(new_x_pos, new_y_pos);
         createVertex(r, c, 'blank');
         verticies[new_r][new_c] = end;
         print('moved end node to ($new_r, $new_c)');
+        calculateAdjacencies();
         return false;
       } else {
         return true;
@@ -285,8 +287,8 @@ class Grid extends DisplayObjectContainer {
 
     Future<void> highlight(List visited, List path) async {
       for (var vertex in visited) {
-        await Future.delayed(Duration(milliseconds : 2));
         vertex.highlight('blue');
+        await Future.delayed(Duration(microseconds : 100));
         drawSprite(vertex);
       }
 
