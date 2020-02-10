@@ -1,7 +1,6 @@
 import 'package:stagexl/stagexl.dart';
 
 class Vertex {
-
   String type;
   List<Vertex> adjacencies = [];
   double minDistance = double.infinity;
@@ -18,24 +17,14 @@ class Vertex {
     sprite.addChild(bitmap);
   }
 
-  void setType(String type) {
-    this.type = type;
-  }
-
-  int compareTo(Vertex other) {
-    return minDistance.compareTo(other.minDistance);
-  }
-
   void moveSprite(double x, double y) {
     sprite.x = x;
     sprite.y = y;
   }
 
-  // TODO: instead of using highlight, should create vertexless bitmaps stored in arrays for path/visited
   Future<void> highlight(String color) async {
     int colorInt;
     if (type != 'start' && type != 'end') {
-      // Note: blank verticies do not have a drawn sprite
       if (color == 'yellow') {
         colorInt = Color.LightGoldenrodYellow;
       } else if (color == 'blue') {
