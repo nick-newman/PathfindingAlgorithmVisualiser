@@ -152,7 +152,7 @@ class Grid extends DisplayObjectContainer {
   }
 
   bool moveEndpoint(int r, int c) {
-    if (deleteVertex(r, c)) {
+    if (deleteVertex(r, c, true)) {
       return false;
     }
 
@@ -175,7 +175,7 @@ class Grid extends DisplayObjectContainer {
       return false;
     }
 
-    deleteVertex(new_r, new_c);
+    deleteVertex(new_r, new_c, true);
 
     if (verticies[r][c] == start) {
       start.moveSprite(new_x_pos, new_y_pos);
@@ -194,11 +194,13 @@ class Grid extends DisplayObjectContainer {
     }
   }
 
-  bool deleteVertex(int r, int c) {
+  bool deleteVertex(int r, int c, bool audit) {
     if (verticies[r][c].type == 'wall' || verticies[r][c].type == 'visited') {
       stage.removeChild(verticies[r][c].sprite);
       createVertex(r, c, 'blank');
-      print('deleted wall at ($r, $c)');
+      if (audit) {
+        print('deleted wall at ($r, $c)');
+      }
       return true;
     }
     return false;
@@ -207,7 +209,7 @@ class Grid extends DisplayObjectContainer {
   void clearVerticies() {
     for (var r = 0; r < verticies.length; r++) {
       for (var c = 0; c < verticies[r].length; c++) {
-        deleteVertex(r, c);
+        deleteVertex(r, c, false);
       }
     }
   }
