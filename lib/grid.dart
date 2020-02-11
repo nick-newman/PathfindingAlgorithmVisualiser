@@ -229,7 +229,7 @@ class Grid extends DisplayObjectContainer {
   }
 
   void clearVerticies() {
-    if (running) {
+    if (algorithm) {
       print("can't clear verticies while running");
       return;
     }
