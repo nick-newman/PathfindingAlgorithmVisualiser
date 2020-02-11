@@ -8,12 +8,32 @@ html, body, .stage--fullscreen {
     border: 0;
 }
 
+#speedText {
+    font-size: 16px;
+    font-family: 'Open Sans', sans-serif;
+    text-align: left;
+    margin-left: 20px;
+    margin-bottom: 1px;
+    background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+}
+
+#speedInput {
+    font-size: 16px;
+    font-family: 'Open Sans', sans-serif;
+    text-align: left;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    background-color: rgb(240, 240, 240);
+    color: rgb(0, 0, 0);
+}
+
 #dijkstraButton {
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
     text-align: left;
     margin-left: 20px;
-    margin-top: 20px;
+    margin-top: 34px;
     margin-bottom: 20px;
     background-color: rgb(240, 240, 240);
     color: rgb(0, 0, 0);
@@ -24,8 +44,19 @@ html, body, .stage--fullscreen {
     font-family: 'Open Sans', sans-serif;
     text-align: left;
     margin-left: 20px;
-    margin-top: 20px;
+    margin-top: 34px;
     margin-bottom: 20px;
     background-color: rgb(240, 240, 240);
+    color: rgb(0, 0, 0);
+}
+
+#stopButton {
+    font-size: 16px;
+    font-family: 'Open Sans', sans-serif;
+    text-align: left;
+    margin-left: 20px;
+    margin-top: 34px;
+    margin-bottom: 20px;
+    background-color: rgb(240, 180, 180);
     color: rgb(0, 0, 0);
 }

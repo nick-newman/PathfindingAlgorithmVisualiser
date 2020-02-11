@@ -7,6 +7,7 @@ class Grid extends DisplayObjectContainer {
   var stage;
   var canvas, renderLoop;
   Bitmap background;
+  bool running = true, algorithm = false;
 
   final verticies = List<List<Vertex>>.generate(
       25, (i) => List<Vertex>.generate(25, (j) => null));
@@ -91,11 +92,27 @@ class Grid extends DisplayObjectContainer {
 
     var dijkstraButton = querySelector('#dijkstraButton');
     dijkstraButton.onClick.listen((e) {
+      if (algorithm) {
+        return;
+      }
+      running = true;
+      var speed = int.parse((querySelector('#speedInput') as InputElement).value);
+      if (speed < 0 || speed > 5000) {
+        speed = 50;
+      }
       print("running Dijkstra's algorithm");
+      for (var r = 0; r < verticies.length; r++) {
+        for (var c = 0; c < verticies[r].length; c++) {
+          if (verticies[r][c].type == 'visited' || verticies[r][c].type == 'path') {
+            stage.removeChild(verticies[r][c].sprite);
+            createVertex(r, c, 'blank');
+          }
+        }
+      }
       calculateAdjacencies();
       var visited = computePaths();
       var path = getShortestPath();
-      highlight(visited, path);
+      highlight(visited, path, speed);
       print("ran Dijkstra's algorithm");
       for (var r = 0; r < verticies.length; r++) {
         for (var c = 0; c < verticies[r].length; c++) {
@@ -109,9 +126,14 @@ class Grid extends DisplayObjectContainer {
 
     var clearButton = querySelector('#clearButton');
     clearButton.onClick.listen((e) {
-      print('clearing verticies');
       clearVerticies();
-      print('cleared verticies');
+    });
+
+    var stopButton = querySelector('#stopButton');
+    stopButton.onClick.listen((e) {
+      running = false;
+      algorithm = false;
+      print('stopped');
     });
   }
 
@@ -207,11 +229,17 @@ class Grid extends DisplayObjectContainer {
   }
 
   void clearVerticies() {
+    if (running) {
+      print("can't clear verticies while running");
+      return;
+    }
+    print('clearing verticies');
     for (var r = 0; r < verticies.length; r++) {
       for (var c = 0; c < verticies[r].length; c++) {
         deleteVertex(r, c, false);
       }
     }
+    print('cleared verticies');
   }
 
   void calculateAdjacencies() {
@@ -234,31 +262,31 @@ class Grid extends DisplayObjectContainer {
   }
 
   List computePaths() {
+    algorithm = true;
     var visited = [];
     start.minDistance = 0;
     var queue = [];
     queue.add(start);
-
     while (queue.isNotEmpty) {
       if (queue.elementAt(0).type == 'wall') {
         queue.removeAt(0);
       }
-      var current = queue.elementAt(0);
-      queue.removeAt(0);
-      if (current == end) {
-        return visited;
-      }
-      visited.add(current);
-      for (Vertex vertex in current.adjacencies) {
-        double currentDistance = current.minDistance + 1;
-        if (currentDistance < vertex.minDistance) {
-          queue.remove(vertex);
-          vertex.minDistance = currentDistance;
-          vertex.previous = current;
-          queue.add(vertex);
+        var current = queue.elementAt(0);
+        queue.removeAt(0);
+        if (current == end) {
+          return visited;
+        }
+        visited.add(current);
+        for (Vertex vertex in current.adjacencies) {
+          double currentDistance = current.minDistance + 1;
+          if (currentDistance < vertex.minDistance) {
+            queue.remove(vertex);
+            vertex.minDistance = currentDistance;
+            vertex.previous = current;
+            queue.add(vertex);
+          }
         }
       }
-    }
     return visited;
   }
 
@@ -270,17 +298,25 @@ class Grid extends DisplayObjectContainer {
     return path;
   }
 
-  Future<void> highlight(List visited, List path) async {
+  Future<void> highlight(List visited, List path, int speed) async {
     for (var vertex in visited) {
+      if (!running) {
+        return;
+      }
       vertex.highlight('blue');
-      await Future.delayed(Duration(microseconds: 100));
+      await Future.delayed(Duration(milliseconds: speed));
       drawSprite(vertex);
     }
 
     for (var vertex in path) {
+      if (!running) {
+        return;
+      }
       vertex.highlight('yellow');
       drawSprite(vertex);
     }
+    running = false;
+    algorithm = false;
   }
 
   void drawSprite(Vertex vertex) {
