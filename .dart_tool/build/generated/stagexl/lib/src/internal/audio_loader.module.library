@@ -1,0 +1,1 @@
+{"isEntrypoint":false,"deps":["stagexl|lib/src/errors.dart"],"parts":[],"conditionalDeps":[],"sdkDeps":["async","html"],"hasMain":false}

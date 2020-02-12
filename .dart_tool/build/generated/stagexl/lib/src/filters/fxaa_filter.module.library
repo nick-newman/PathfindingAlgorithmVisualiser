@@ -1,0 +1,1 @@
+{"isEntrypoint":false,"deps":["stagexl|lib/src/display.dart","stagexl|lib/src/engine.dart","stagexl|lib/src/geom.dart"],"parts":[],"conditionalDeps":[],"sdkDeps":[],"hasMain":false}

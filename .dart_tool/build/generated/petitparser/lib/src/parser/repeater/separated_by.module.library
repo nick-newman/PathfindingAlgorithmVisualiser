@@ -1,0 +1,1 @@
+{"isEntrypoint":false,"deps":["petitparser|lib/src/core/parser.dart","petitparser|lib/src/parser/action/map.dart","petitparser|lib/src/parser/combinator/optional.dart","petitparser|lib/src/parser/combinator/sequence.dart","petitparser|lib/src/parser/repeater/possesive.dart"],"parts":[],"conditionalDeps":[],"sdkDeps":[],"hasMain":false}

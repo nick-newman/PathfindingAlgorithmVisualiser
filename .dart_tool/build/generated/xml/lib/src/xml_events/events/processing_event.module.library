@@ -1,0 +1,1 @@
+{"isEntrypoint":false,"deps":["xml|lib/xml.dart","xml|lib/src/xml_events/event.dart","xml|lib/src/xml_events/visitor.dart"],"parts":[],"conditionalDeps":[],"sdkDeps":[],"hasMain":false}

@@ -1,0 +1,1 @@
+{"isEntrypoint":true,"deps":["stagexl|lib/stagexl.dart","test_project3|lib/vertex.dart"],"parts":[],"conditionalDeps":[],"sdkDeps":["html"],"hasMain":false}

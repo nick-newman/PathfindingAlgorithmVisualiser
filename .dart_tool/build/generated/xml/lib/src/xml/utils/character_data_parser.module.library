@@ -1,0 +1,1 @@
+{"isEntrypoint":false,"deps":["petitparser|lib/petitparser.dart","xml|lib/src/xml/entities/entity_mapping.dart"],"parts":[],"conditionalDeps":[],"sdkDeps":[],"hasMain":false}

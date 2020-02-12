@@ -1,0 +1,1 @@
+{"isEntrypoint":false,"deps":["stagexl|lib/src/geom/matrix.dart","stagexl|lib/src/geom/point.dart","stagexl|lib/src/geom/rectangle.dart"],"parts":[],"conditionalDeps":[],"sdkDeps":["math","typed_data"],"hasMain":false}

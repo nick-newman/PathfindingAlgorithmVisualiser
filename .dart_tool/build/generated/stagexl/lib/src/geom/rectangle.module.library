@@ -1,0 +1,1 @@
+{"isEntrypoint":false,"deps":["stagexl|lib/src/geom/point.dart","stagexl|lib/src/internal/jenkins_hash.dart"],"parts":[],"conditionalDeps":[],"sdkDeps":["math"],"hasMain":false}
