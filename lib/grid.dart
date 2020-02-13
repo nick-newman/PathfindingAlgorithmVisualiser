@@ -110,10 +110,44 @@ class Grid extends DisplayObjectContainer {
         }
       }
       calculateAdjacencies();
-      var visited = computePaths();
+      var visited = computeDijkstraPaths();
       var path = getShortestPath();
       highlight(visited, path, speed);
       print("ran Dijkstra's algorithm");
+      for (var r = 0; r < verticies.length; r++) {
+        for (var c = 0; c < verticies[r].length; c++) {
+          Vertex blankPrevious;
+          verticies[r][c].previous = blankPrevious;
+          verticies[r][c].minDistance = double.infinity;
+          verticies[r][c].adjacencies.clear();
+        }
+      }
+    });
+
+    var aStarButton = querySelector('#aStarButton');
+    aStarButton.onClick.listen((e) {
+      if (algorithm) {
+        return;
+      }
+      running = true;
+      var speed = int.parse((querySelector('#speedInput') as InputElement).value);
+      if (speed < 0 || speed > 5000) {
+        speed = 50;
+      }
+      print('running A* algorithm');
+      for (var r = 0; r < verticies.length; r++) {
+        for (var c = 0; c < verticies[r].length; c++) {
+          if (verticies[r][c].type == 'visited' || verticies[r][c].type == 'path') {
+            stage.removeChild(verticies[r][c].sprite);
+            createVertex(r, c, 'blank');
+          }
+        }
+      }
+      calculateAdjacencies();
+      var visited = computeAStarPaths();
+      var path = getShortestPath();
+      highlight(visited, path, speed);
+      print('ran A* algorithm');
       for (var r = 0; r < verticies.length; r++) {
         for (var c = 0; c < verticies[r].length; c++) {
           Vertex blankPrevious;
@@ -261,7 +295,7 @@ class Grid extends DisplayObjectContainer {
     }
   }
 
-  List computePaths() {
+  List computeDijkstraPaths() {
     algorithm = true;
     var visited = [];
     start.minDistance = 0;
@@ -285,6 +319,63 @@ class Grid extends DisplayObjectContainer {
             vertex.previous = current;
             queue.add(vertex);
           }
+        }
+      }
+    return visited;
+  }
+
+  List computeAStarPaths() {
+    algorithm = true;
+    var visited = [];
+    start.minDistance = 0;
+    var queue = [];
+    queue.add(start);
+    while (queue.isNotEmpty) {
+      if (queue.elementAt(0).type == 'wall') {
+        queue.removeAt(0);
+      }
+        var current = queue.elementAt(0);
+        queue.removeAt(0);
+        if (current == end) {
+          return visited;
+        }
+        visited.add(current);
+        for (Vertex vertex in current.adjacencies) {
+
+//-*
+
+//https://dzone.com/articles/from-dijkstra-to-a-star-a-part-2-the-a-star-a-algo
+
+//g_cost is minDistance
+//f_cost should be added to vertex, set to infinity (later gets calculated by algo)
+//h_cost is set to nothing in constructor, set to something here (it is the estimation)
+
+      //double new_g_cost = current.g_cost + 1; \/
+      double currentDistance = current.minDistance + 1;
+      double newEstDistance = 1 + new_g_cost;
+      //vertex.h_cost instead of 1 for above
+
+      if (newEstDistance < vertex.estDistance) {
+        vertex.parent = current;
+        vertex.minDistance = currentDistance;
+        //vertex.g_cost = new_g_cost; /\
+        vertex.estDistance = newEstDistance;
+        if (queue.contains(vertex)) {
+          queue.remove(vertex);
+        }
+        queue.add(vertex);
+      }
+//-*
+
+//--
+          //double currentDistance = current.minDistance + 1;
+          if (currentDistance < vertex.minDistance) {
+            queue.remove(vertex);
+            vertex.minDistance = currentDistance;
+            vertex.previous = current;
+            queue.add(vertex);
+          }
+//--
         }
       }
     return visited;

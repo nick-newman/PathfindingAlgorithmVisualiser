@@ -4,6 +4,7 @@ class Vertex {
   String type;
   List<Vertex> adjacencies = [];
   double minDistance = double.infinity;
+  double estDistance = double.infinity;
   int row, col;
   Vertex previous;
 
