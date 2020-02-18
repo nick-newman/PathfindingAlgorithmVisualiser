@@ -4,9 +4,11 @@ class Vertex {
   String type;
   List<Vertex> adjacencies = [];
   double minDistance = double.infinity;
-  double estDistance = double.infinity;
   int row, col;
   Vertex previous;
+  
+  double f_cost = double.infinity;
+  double h_cost;
 
   Sprite sprite;
   Bitmap bitmap;

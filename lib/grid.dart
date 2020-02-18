@@ -144,6 +144,7 @@ class Grid extends DisplayObjectContainer {
         }
       }
       calculateAdjacencies();
+      calculateManhattan();
       var visited = computeAStarPaths();
       var path = getShortestPath();
       highlight(visited, path, speed);
@@ -295,6 +296,14 @@ class Grid extends DisplayObjectContainer {
     }
   }
 
+  void calculateManhattan() {
+    for (var r = 0; r < verticies.length; r++) {
+      for (var c = 0; c < verticies[r].length; c++) {
+        verticies[r][c].h_cost = (verticies[r][c].row - end.row).abs() + (verticies[r][c].col - end.col).abs() as double;
+      }
+    }
+  }
+
   List computeDijkstraPaths() {
     algorithm = true;
     var visited = [];
@@ -326,8 +335,9 @@ class Grid extends DisplayObjectContainer {
 
   List computeAStarPaths() {
     algorithm = true;
-    var visited = [];
     start.minDistance = 0;
+    start.f_cost = start.h_cost;
+    var visited = [];
     var queue = [];
     queue.add(start);
     while (queue.isNotEmpty) {
@@ -340,42 +350,24 @@ class Grid extends DisplayObjectContainer {
           return visited;
         }
         visited.add(current);
-        for (Vertex vertex in current.adjacencies) {
-
+      for (Vertex vertex in current.adjacencies) {
 //-*
+      var currentDistance = current.minDistance + 1;
+      var new_f_cost = vertex.h_cost + currentDistance;
 
-//https://dzone.com/articles/from-dijkstra-to-a-star-a-part-2-the-a-star-a-algo
+      if (new_f_cost < vertex.f_cost) {
 
-//g_cost is minDistance
-//f_cost should be added to vertex, set to infinity (later gets calculated by algo)
-//h_cost is set to nothing in constructor, set to something here (it is the estimation)
+        queue.remove(vertex);
 
-      //double new_g_cost = current.g_cost + 1; \/
-      double currentDistance = current.minDistance + 1;
-      double newEstDistance = 1 + new_g_cost;
-      //vertex.h_cost instead of 1 for above
-
-      if (newEstDistance < vertex.estDistance) {
-        vertex.parent = current;
+        vertex.previous = current;
         vertex.minDistance = currentDistance;
-        //vertex.g_cost = new_g_cost; /\
-        vertex.estDistance = newEstDistance;
-        if (queue.contains(vertex)) {
-          queue.remove(vertex);
-        }
+        vertex.f_cost = new_f_cost;
+        //if (queue.contains(vertex)) {
+        //  queue.remove(vertex);
+        //}
         queue.add(vertex);
       }
 //-*
-
-//--
-          //double currentDistance = current.minDistance + 1;
-          if (currentDistance < vertex.minDistance) {
-            queue.remove(vertex);
-            vertex.minDistance = currentDistance;
-            vertex.previous = current;
-            queue.add(vertex);
-          }
-//--
         }
       }
     return visited;
