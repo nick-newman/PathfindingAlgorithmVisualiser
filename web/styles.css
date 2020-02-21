@@ -50,7 +50,18 @@ html, body, .stage--fullscreen {
     color: rgb(0, 0, 0);
 }
 
-#clearButton {
+#clearWallsButton {
+    font-size: 16px;
+    font-family: 'Open Sans', sans-serif;
+    text-align: left;
+    margin-left: 20px;
+    margin-top: 34px;
+    margin-bottom: 20px;
+    background-color: rgb(240, 240, 240);
+    color: rgb(0, 0, 0);
+}
+
+#clearAllButton {
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
     text-align: left;

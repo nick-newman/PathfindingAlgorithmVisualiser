@@ -96,14 +96,16 @@ class Grid extends DisplayObjectContainer {
         return;
       }
       running = true;
-      var speed = int.parse((querySelector('#speedInput') as InputElement).value);
+      var speed =
+          int.parse((querySelector('#speedInput') as InputElement).value);
       if (speed < 0 || speed > 5000) {
         speed = 50;
       }
       print("running Dijkstra's algorithm");
       for (var r = 0; r < verticies.length; r++) {
         for (var c = 0; c < verticies[r].length; c++) {
-          if (verticies[r][c].type == 'visited' || verticies[r][c].type == 'path') {
+          if (verticies[r][c].type == 'visited' ||
+              verticies[r][c].type == 'path') {
             stage.removeChild(verticies[r][c].sprite);
             createVertex(r, c, 'blank');
           }
@@ -130,14 +132,16 @@ class Grid extends DisplayObjectContainer {
         return;
       }
       running = true;
-      var speed = int.parse((querySelector('#speedInput') as InputElement).value);
+      var speed =
+          int.parse((querySelector('#speedInput') as InputElement).value);
       if (speed < 0 || speed > 5000) {
         speed = 50;
       }
       print('running A* algorithm');
       for (var r = 0; r < verticies.length; r++) {
         for (var c = 0; c < verticies[r].length; c++) {
-          if (verticies[r][c].type == 'visited' || verticies[r][c].type == 'path') {
+          if (verticies[r][c].type == 'visited' ||
+              verticies[r][c].type == 'path') {
             stage.removeChild(verticies[r][c].sprite);
             createVertex(r, c, 'blank');
           }
@@ -159,9 +163,14 @@ class Grid extends DisplayObjectContainer {
       }
     });
 
-    var clearButton = querySelector('#clearButton');
-    clearButton.onClick.listen((e) {
-      clearVerticies();
+    var clearAllButton = querySelector('#clearAllButton');
+    clearAllButton.onClick.listen((e) {
+      clearVerticies(true);
+    });
+
+    var clearWallsButton = querySelector('#clearWallsButton');
+    clearWallsButton.onClick.listen((e) {
+      clearVerticies(false);
     });
 
     var stopButton = querySelector('#stopButton');
@@ -209,7 +218,7 @@ class Grid extends DisplayObjectContainer {
   }
 
   bool moveEndpoint(int r, int c) {
-    if (deleteVertex(r, c, true)) {
+    if (deleteVertex(r, c, true, true)) {
       return false;
     }
 
@@ -232,7 +241,7 @@ class Grid extends DisplayObjectContainer {
       return false;
     }
 
-    deleteVertex(new_r, new_c, true);
+    deleteVertex(new_r, new_c, true, true);
 
     if (verticies[r][c] == start) {
       start.moveSprite(new_x_pos, new_y_pos);
@@ -251,7 +260,15 @@ class Grid extends DisplayObjectContainer {
     }
   }
 
-  bool deleteVertex(int r, int c, bool audit) {
+  bool deleteVertex(int r, int c, bool audit, bool walls) {
+    if (!walls) {
+      if (verticies[r][c].type == 'visited') {
+        stage.removeChild(verticies[r][c].sprite);
+        createVertex(r, c, 'blank');
+        return true;
+      }
+      return false;
+    }
     if (verticies[r][c].type == 'wall' || verticies[r][c].type == 'visited') {
       stage.removeChild(verticies[r][c].sprite);
       createVertex(r, c, 'blank');
@@ -263,7 +280,7 @@ class Grid extends DisplayObjectContainer {
     return false;
   }
 
-  void clearVerticies() {
+  void clearVerticies(bool walls) {
     if (algorithm) {
       print("can't clear verticies while running");
       return;
@@ -271,7 +288,7 @@ class Grid extends DisplayObjectContainer {
     print('clearing verticies');
     for (var r = 0; r < verticies.length; r++) {
       for (var c = 0; c < verticies[r].length; c++) {
-        deleteVertex(r, c, false);
+        deleteVertex(r, c, false, walls);
       }
     }
     print('cleared verticies');
@@ -299,7 +316,9 @@ class Grid extends DisplayObjectContainer {
   void calculateManhattan() {
     for (var r = 0; r < verticies.length; r++) {
       for (var c = 0; c < verticies[r].length; c++) {
-        verticies[r][c].h_cost = (verticies[r][c].row - end.row).abs() + (verticies[r][c].col - end.col).abs() as double;
+        verticies[r][c].h_cost = (verticies[r][c].row - end.row).abs() +
+            (verticies[r][c].col - end.col).abs() as double;
+            //TODO: issue with nodes behind start?
       }
     }
   }
@@ -314,22 +333,22 @@ class Grid extends DisplayObjectContainer {
       if (queue.elementAt(0).type == 'wall') {
         queue.removeAt(0);
       }
-        var current = queue.elementAt(0);
-        queue.removeAt(0);
-        if (current == end) {
-          return visited;
-        }
-        visited.add(current);
-        for (Vertex vertex in current.adjacencies) {
-          double currentDistance = current.minDistance + 1;
-          if (currentDistance < vertex.minDistance) {
-            queue.remove(vertex);
-            vertex.minDistance = currentDistance;
-            vertex.previous = current;
-            queue.add(vertex);
-          }
+      var current = queue.elementAt(0);
+      queue.removeAt(0);
+      if (current == end) {
+        return visited;
+      }
+      visited.add(current);
+      for (Vertex vertex in current.adjacencies) {
+        double currentDistance = current.minDistance + 1;
+        if (currentDistance < vertex.minDistance) {
+          queue.remove(vertex);
+          vertex.minDistance = currentDistance;
+          vertex.previous = current;
+          queue.add(vertex);
         }
       }
+    }
     return visited;
   }
 
@@ -344,39 +363,33 @@ class Grid extends DisplayObjectContainer {
       if (queue.elementAt(0).type == 'wall') {
         queue.removeAt(0);
       }
-        var current = queue.elementAt(0);
-        queue.removeAt(0);
-        if (current == end) {
-          return visited;
-        }
-        visited.add(current);
+      var current = queue.elementAt(0);
+      queue.removeAt(0);
+      if (current == end) {
+        return visited;
+      }
+      visited.add(current);
       for (Vertex vertex in current.adjacencies) {
-//-*
-      var currentDistance = current.minDistance + 1;
-      var new_f_cost = vertex.h_cost + currentDistance;
-
-      if (new_f_cost < vertex.f_cost) {
-
-        queue.remove(vertex);
-
-        vertex.previous = current;
-        vertex.minDistance = currentDistance;
-        vertex.f_cost = new_f_cost;
-        //if (queue.contains(vertex)) {
-        //  queue.remove(vertex);
-        //}
-        queue.add(vertex);
-      }
-//-*
+        var currentDistance = current.minDistance + 1;
+        var new_f_cost = vertex.h_cost + currentDistance;
+        if (new_f_cost < vertex.f_cost) {
+          queue.remove(vertex);
+          vertex.previous = current;
+          vertex.minDistance = currentDistance;
+          vertex.f_cost = new_f_cost;
+          queue.add(vertex);
         }
       }
+    }
     return visited;
   }
 
   List getShortestPath() {
     var path = [];
     for (var vertex = end; vertex != null; vertex = vertex.previous) {
-      path.add(vertex);
+      if (vertex.type != 'start' && vertex.type != 'end') {
+        path.add(vertex);
+      }
     }
     return path;
   }
@@ -389,18 +402,35 @@ class Grid extends DisplayObjectContainer {
       vertex.highlight('blue');
       await Future.delayed(Duration(milliseconds: speed));
       drawSprite(vertex);
+      print(vertex.h_cost);
     }
 
+    for (var i = path.length - 1; i > -1; i--) {
+      if (!running) {
+        return;
+      }
+      path[i].highlight('yellow');
+      //await Future.delayed(Duration(milliseconds: speed));
+      drawSprite(path[i]);
+      print(path[i].h_cost);
+    }
+    running = false;
+    algorithm = false;
+    }
+/*
     for (var vertex in path) {
       if (!running) {
         return;
       }
       vertex.highlight('yellow');
+      await Future.delayed(Duration(milliseconds: speed));
       drawSprite(vertex);
+      print(vertex.h_cost);
     }
     running = false;
     algorithm = false;
   }
+  */
 
   void drawSprite(Vertex vertex) {
     stage.addChild(vertex.sprite);
